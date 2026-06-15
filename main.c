@@ -1,11 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-/*
-void aplicarFixo(){
 
-}
-*/
 
 //FUNÇÃO PARA SELECIONAR O DIA//
 int escolherDia(int qtdDias, int mes)
@@ -22,7 +19,7 @@ int escolherDia(int qtdDias, int mes)
         switch (sn)
         {
             case 1:{
-                
+
                 printf("|DIAS DO MES %02d|\n", mes);
                 for(int i=1; i<=qtdDias; i++){
                     printf("[%d] ", i);
@@ -36,89 +33,124 @@ int escolherDia(int qtdDias, int mes)
                 printf("\n");
                 break;
             }
-            
+
             default:{
                 printf("Opcao invalida! \n");
                 break;
             }
         }
     }while (sn!=1 && sn!=2);
+
+    do{
+        printf("|ESCOLHA O DIA| \n");
+        printf(">> ");
+        scanf("%d", &dia);
+
+        if(dia<1||dia>qtdDias){
+            printf("\nERRO: dia selecionado nao compativel! \nDigite novamente...\n\n");
+        }
+
+    }while (dia<1||dia>qtdDias);
+
     
-
-    printf("|ESCOLHA O DIA| \n");
-    printf(">> ");
-    scanf("%d", &dia);
-
     return dia;
 }
 
 
 //FUNÇÃO PARA ESCOLHER O VALOR QUE SERA ADICIONADO//
-float escolherValor(int dia, int mes){
-
+float escolherValor(int dia, int mes)
+{
     float valor;
 
-    printf("Digite o valor a ser adicionado no dia %02d/%02d: \n", dia,mes);
+    do{
+        printf("Digite o valor: \n");
+        printf(">> RS");
+        scanf("%f", &valor);
 
-    printf(">> ");
-    scanf("%f", &valor);
-
+        if(valor<0){
+            printf("ERRO: valor digitado invalido! \nDigite novamente...\n\n");
+        }
+    }while (valor<0);
+    
     return valor;
 }
 
-//FUNÇÃO PARA FAZER UM RELATORIO DO MES//
-void resumoMes(float dias[31][2])
-{
-    printf("dia\tvalor\n");
-    for(int l=0; l<31; l++){
-        for(int c=0; c<2; c++){
-            if(c==1){
-                printf("%.2lf\t", dias[l][c]);
-            }
 
+//FUNÇÃO PARA FAZER UM RELATORIO DO MES//
+void resumoMes(float dias[31][2], float fixo, char string[100], int qtdDias, int mes)
+{   
+
+    float total=0;
+
+    //calcular o total gasto no mes (sem valor fixo)
+    for (int l=0; l<qtdDias-1; l++){
+            total+=dias[l][1];
+    }
+
+    //relatorio do mes
+    printf("|CUSTO FIXO| \n");
+    printf("valor\t\tdescricao\n");
+    printf("RS%.2f\t%s", fixo, string);
+
+    printf("\n\n");
+
+    printf("|RELATORIO DO MES| \n");
+    printf("dia\t\tvalor\n");
+    for(int l=0; l<qtdDias; l++){
+        for(int c=0; c<2; c++){
+            if(c==0){
+                printf("%.0f\t/%02d", dias[l][c], mes);
+            }
             else{
-                printf("[%.0lf]\t", dias[l][c]);
-            } 
+                printf("RS%.2f\t", dias[l][c]);
+            }
         }
         printf("\n");
     }
+
+    printf("\n");
+
+    printf("|TOTAL DO MES: RS%.2f| \n", total+fixo);
 }
 
-//FUNÇÃO PARA ADICIONAR VALOR AO DIA (nao ta adicionando)//
+
+//FUNÇÃO PARA ADICIONAR VALOR AO DIA//
 void adicionarCustoVariavel(int dia, float valor, float dias[31][2])
 {
-    for(int l=0; l<31; l++){
-        for(int c=0; c<1; c++){
+    dias[dia-1][1]+=valor;
 
-            if (c==dia){
-
-                dias[l][2]+=valor;
-
-                printf("\n|VALOR ADICIONADO COM SUCESSO|\n");
-
-            }
-
-        }
-    }
-    
+    printf("|VALOR ADICIONADO COM SUCESSO|\n\n");
 }
 
+
+//FUNÇÃO PARA DESCONTAR VALOR AO DIA//
+void descontarCustoVariavel(int dia, float valor, float dias[31][2])
+{
+    dias[dia-1][1]-=valor;
+
+    //piso 0
+    if(dias[dia-1][1]<0){
+        dias[dia-1][1]=0;
+    }
+
+    printf("|VALOR DESCONTADO COM SUCESSO|\n\n");
+}
+
+
 //MENU PRA CADA MES//
-void menuFuncionalidades(int mes, float dias[31][2]){
+void menuFuncionalidades(int mes, float dias[31][2], float fixo, char string[100], int qtdDias){
 
     int menu, dia;
-    int qtdDias;
     float valor;
 
     printf("|MENU|\n");
-    printf("1.Adicionar custo variavel\n2.Resumo do mes\n3.Excluir\n4.Voltar\n");
+    printf("1.Adicionar custo variavel\n2.Resumo do mes\n3.Descontar\n4.Voltar\n");
     printf(">> ");
     scanf("%d", &menu);
-    
+
     switch(menu)
     {
         case 1:{
-            qtdDias=31;
 
             dia=escolherDia(qtdDias, mes);
 
@@ -133,37 +165,53 @@ void menuFuncionalidades(int mes, float dias[31][2]){
             printf("\n\n");
 
             adicionarCustoVariavel(dia, valor, dias);
-            
+
             break;
         }
-        
+
         case 2:{
             printf("\n");
 
-            resumoMes(dias);
+            resumoMes(dias, fixo, string, qtdDias, mes);
 
             printf("\n");
 
             break;
         }
-        
+
         case 3:{
-        
+            
+            dia=escolherDia(qtdDias, mes);
+
+            printf("DIA ESCOLHIDO: %02d/%02d", dia, mes);
+
+            printf("\n\n");
+
+            valor=escolherValor(dia, mes);
+
+            printf("VALOR A SER DESCONTADO: RS%.2f", valor);
+
+            printf("\n\n");
+
+            descontarCustoVariavel(dia, valor, dias);
+
             break;
         }
-        
+
         case 4:{
             printf("\n");
             break;
         }
-        
+
         default:{
-        
+
         }
-        
+
     }
 
 }
+
+
 
 //////////////
 /////MAIN/////
@@ -174,15 +222,22 @@ int main()
 
     //////VARIAVEIS//////
 
-    int mes;
+    int mes, menu;
     //int meses[12];
     float dias[31][2];
-    //float fixo;
-    
+    float fixo=0;
+
+    int qtdDias;
+
+    int desc;
+    char string[100];
+
+    //float total=0.0;//
+
     //////////////PREENCHER MATRIZ//////////////
 
     for(int c=0; c<2; c++){
-        
+
         for(int l=0; l<31; l++){
             if (c==0){
                 dias[l][c]=l+1;
@@ -196,20 +251,79 @@ int main()
     ////////////////////////////////////////////////
 
     printf("\n");
-    
+
     //////PAGINA INICIAL//////
 
-    printf("|TUTULO| \n\n");
+    printf("|TITULO| \n\n");
 
-    ////////custo fixo////////
+    //////MENU INICIAL//////
 
-    /*printf("|INFORME SEU CUSTO FIXO| \n");
-    printf(">> ");
-    scanf(" %f", &fixo);*/
-    
-    //aplicar custo fixo no valor final de todos os meses//
+    do{
+        printf("|MENU INICIAL| \n");
+        printf("\n[1]Adicionar custo fixo \n[2]pular \n[ATENCAO]informacao nao editavel! \n>> ");
+        scanf("%d", &menu);
 
-    //////////////////////////
+        printf("\n");
+
+        switch (menu)
+        {
+            case 1:{
+                
+                ////////////custo fixo////////////
+
+                do{
+                    printf("|INFORME SEU CUSTO FIXO| \n");
+                    printf(">> ");
+                    scanf(" %f", &fixo);
+
+                    if(fixo<0){
+                        printf("Valor invalido! Digite novamente...\n\n");
+                    }
+                }while (fixo<0);
+
+                printf("\n");
+
+                do{
+                    printf("Deseja adicionar uma descricao para o custo fixo? \n[1]sim\n[2]nao\n>> ");
+                    scanf("%d", &desc);
+
+                    switch(desc){
+                        case 1:{
+                            printf("\nDescricao: ");
+                            scanf(" %[^\n]s", string);
+                            break;
+                        }
+
+                        case 2:{
+                            break;
+                        }
+
+                        default:{
+                            printf("Opcao Invalida!\n\n");
+                        }
+
+                    }
+                }while(desc!=1 && desc!=2);
+
+                printf("\n");
+
+                break;
+            }
+
+            case 2:{
+
+                break;
+            }
+            
+            default:
+                printf("Opcao Invalida!\n\n");
+                break;
+        }
+            
+    }while(menu!=1 && menu!=2);
+    ///////////////////////////////
+
+    //////////MENU DE MES//////////
 
     do{
         printf("|SELECIONE O MES| \n");
@@ -223,18 +337,17 @@ int main()
 
         {
             case 1:{
-                
+
                 printf("|JANEIRO| \n\n");
+                qtdDias=31;
 
-                menuFuncionalidades(mes, dias);
-
-                
+                menuFuncionalidades(mes, dias, fixo, string, qtdDias);
 
                 break;
             }
 
-            
-            
+
+
             case 2:{
                 printf("|FEVEREIRO| \n");
 
@@ -330,3 +443,4 @@ int main()
 
     return 0;
 }
+
